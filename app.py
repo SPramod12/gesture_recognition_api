@@ -25,8 +25,6 @@ def preprocess(video, start=6, end=24):
         if flag:
             image = cv2.rotate(image, cv2.ROTATE_180)
             # image = image[360:-360,20:-20,:]
-            cv2.imshow('hei', image)
-            cv2.waitKey(0)
             image = cv2.resize(image, (80, 80))
             x[img_start,:,:,:] = image
             img_start = img_start+1
