@@ -7,16 +7,13 @@ import os
 
 app = Flask(__name__)
 
-model = load_model('models/model-00001-0.04385-0.99397-0.54557-0.87000.h5')
-gestures = ['Left Swipe', 'Right Swipe', 'Stop', 'Tumbs Down', 'Tumbs Up']
-
 def preprocess(video, start=6, end=24):
     vidcap = cv2.VideoCapture(video)
     success,image = vidcap.read()
     count = 0
     img_start=0
     flag=False
-    x = np.zeros((18, 80, 80, 3))
+    x = np.zeros((18, 112, 112, 3))
     while success:
         if count==start:
             flag=True
@@ -25,7 +22,7 @@ def preprocess(video, start=6, end=24):
         if flag:
             image = cv2.rotate(image, cv2.ROTATE_180)
             # image = image[360:-360,20:-20,:]
-            image = cv2.resize(image, (80, 80))
+            image = cv2.resize(image, (112, 112))
             x[img_start,:,:,:] = image
             img_start = img_start+1
         success,image = vidcap.read()
@@ -44,12 +41,14 @@ def index():
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     if request.method == 'POST':
+        gestures = ['Left Swipe', 'Right Swipe', 'Stop', 'Tumbs Down', 'Tumbs Up']
+        model = load_model('models/model-00005-0.38287-0.87783-0.62432-0.85000.h5')
         f = request.files['video']
         basepath = os.path.dirname(__file__)
         file_path = os.path.join(
             basepath, 'uploads', secure_filename(f.filename))
         f.save(file_path)
-        x = preprocess(file_path).reshape(1, 18, 80, 80,3)
+        x = preprocess(file_path).reshape(1, 18, 112, 112,3)
         pred = model.predict(x)[0].argmax()
         return gestures[pred]
     else:
