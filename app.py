@@ -3,7 +3,8 @@ import cv2
 from keras.models import load_model
 import numpy as np
 from werkzeug.utils import secure_filename
-import os
+import os, psutil
+import gc
 
 app = Flask(__name__)
 
@@ -32,7 +33,17 @@ def preprocess(video, start=6, end=24):
         os.remove(video)
     else:
         print("The file does not exist")
+    gc.collect()
     return x
+
+def prediction(file_path):
+    model = load_model('models/model-00005-0.38287-0.87783-0.62432-0.85000.h5')
+    x = preprocess(file_path).reshape(1, 18, 112, 112,3)
+    pred = model.predict(x)[0].argmax()
+    gc.collect()
+    del model
+    del x
+    return pred
 
 @app.route('/', methods=['GET'])
 def index():
@@ -42,18 +53,20 @@ def index():
 def predict():
     if request.method == 'POST':
         gestures = ['Left Swipe', 'Right Swipe', 'Stop', 'Tumbs Down', 'Tumbs Up']
-        model = load_model('models/model-00005-0.38287-0.87783-0.62432-0.85000.h5')
         f = request.files['video']
         basepath = os.path.dirname(__file__)
         file_path = os.path.join(
             basepath, 'uploads', secure_filename(f.filename))
         f.save(file_path)
-        x = preprocess(file_path).reshape(1, 18, 112, 112,3)
-        pred = model.predict(x)[0].argmax()
-        return gestures[pred]
+        process = psutil.Process(os.getpid())
+        print(process.memory_info().rss)
+        gc.collect()
+        final = gestures[prediction(file_path)]
+        del gestures
+        del f
+        return final
     else:
         return "None"
 
 if __name__ == '__main__':
     app.run(debug=True)
- 
