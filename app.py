@@ -1,4 +1,3 @@
-from __future__ import division, print_function
 from flask import Flask, request
 import cv2
 from keras.models import load_model
