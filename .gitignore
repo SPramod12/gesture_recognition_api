@@ -81,6 +81,9 @@ target/
 profile_default/
 ipython_config.py
 
+my-env/
+my-env
+
 # pyenv
 .python-version
 
