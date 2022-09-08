@@ -1,12 +1,15 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import cv2
 from keras.models import load_model
 import numpy as np
 from werkzeug.utils import secure_filename
 import os, psutil
 import gc
+from flask_cors import CORS
+import glob
 
 app = Flask(__name__)
+CORS(app)
 
 def preprocess(video, start=6, end=24):
     vidcap = cv2.VideoCapture(video)
@@ -55,6 +58,13 @@ def predict():
         gestures = ['Left Swipe', 'Right Swipe', 'Stop', 'Tumbs Down', 'Tumbs Up']
         f = request.files['video']
         basepath = os.path.dirname(__file__)
+        del_dir = os.path.join(basepath, 'uploads')
+        del_files = glob.glob(del_dir+"/*")
+        if os.path.exists(del_dir):
+            for df in del_files:
+                os.remove(df)
+        if not os.path.exists(del_dir):
+            os.makedirs(del_dir)
         file_path = os.path.join(
             basepath, 'uploads', secure_filename(f.filename))
         f.save(file_path)
@@ -64,7 +74,8 @@ def predict():
         final = gestures[prediction(file_path)]
         del gestures
         del f
-        return final
+        print(final)
+        return jsonify({'prediction':final})
     else:
         return "None"
 
