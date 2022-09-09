@@ -28,7 +28,7 @@ def preprocess(video, start=6, end=24):
             flag=False
         if flag:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = cv2.rotate(image, cv2.ROTATE_180)
+            # image = cv2.rotate(image, cv2.ROTATE_180)
             image = image[160:,:,:]
             image = cv2.resize(image, (112, 112))
             img_list.append(image)
