@@ -7,8 +7,8 @@ import os
 import gc
 from flask_cors import CORS
 import glob
-# import imageio
-# from pathlib import Path
+import imageio
+from pathlib import Path
 
 app = Flask(__name__)
 CORS(app)
@@ -28,7 +28,7 @@ def preprocess(video, start=6, end=24):
             flag=False
         if flag:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            # image = cv2.rotate(image, cv2.ROTATE_180)
+            image = cv2.rotate(image, cv2.ROTATE_180)
             image = image[160:,:,:]
             image = cv2.resize(image, (112, 112))
             img_list.append(image)
@@ -38,9 +38,9 @@ def preprocess(video, start=6, end=24):
         success,image = vidcap.read()
         count += 1
     vidcap.release()
-    # p = ''.join(os.path.split(Path(video))[:-1])
-    # p = os.path.join(p, 'video.gif')
-    # imageio.mimsave(p, img_list, fps=10)
+    p = ''.join(os.path.split(Path(video))[:-1])
+    p = os.path.join(p, 'video.gif')
+    imageio.mimsave(p, img_list, fps=10)
     # gif = send_file(p,as_attachment=True)
     if os.path.exists(video):
         os.remove(video)
